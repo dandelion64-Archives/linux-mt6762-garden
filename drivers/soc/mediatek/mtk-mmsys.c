@@ -303,8 +303,9 @@ static int mtk_mmsys_reset_update(struct reset_controller_dev *rcdev, unsigned l
 	u32 reg;
 
 	offset = (id / MMSYS_SW_RESET_PER_REG) * sizeof(u32);
+	reg = id < 32 ? mmsys->data->sw0_rst_offset + offset
+				  : mmsys->data->lcm_rst_offset + offset;
 	id = id % MMSYS_SW_RESET_PER_REG;
-	reg = mmsys->data->sw0_rst_offset + offset;
 
 	spin_lock_irqsave(&mmsys->lock, flags);
 
