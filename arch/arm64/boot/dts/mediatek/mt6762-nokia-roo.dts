@@ -101,3 +101,36 @@
 &uart0 {
     status = "okay";
 };
+
+&dsi {
+	status = "okay";
+
+	panel: panel@0 {
+		compatible = "himax,hx83102";
+		reg = <0>;
+
+		reset-gpios = <&pio 45 GPIO_ACTIVE_LOW>;
+
+		//pinctrl-names = "default";
+		//pinctrl-0 = <&panel_default>;
+
+		port {
+			panel_in: endpoint {
+				remote-endpoint = <&dsi0_out>;
+			};
+		};
+	};
+};
+
+&dsi0_out {
+    remote-endpoint = <&panel_in>;
+};
+
+/*&pio {
+    panel_default: panel-default-pins {
+		pins-reset {
+			pinmux = <PINMUX_GPIO45__FUNC_LCM_RST>;
+		};
+	};
+
+};*/
