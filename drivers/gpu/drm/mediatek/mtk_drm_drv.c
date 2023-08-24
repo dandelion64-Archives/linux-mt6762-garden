@@ -84,6 +84,12 @@ static const unsigned int mt6765_mtk_ddp_main[] = {
 	DDP_COMPONENT_DSI0,
 };
 
+static const unsigned int mt6765_mtk_ddp_minimal[] = {
+	DDP_COMPONENT_OVL0,
+	DDP_COMPONENT_RDMA0,
+	DDP_COMPONENT_DSI0,
+};
+
 static const unsigned int mt6765_mtk_ddp_ext[] = {
 	DDP_COMPONENT_OVL_2L1,
 	DDP_COMPONENT_RDMA1,
@@ -255,10 +261,10 @@ static const struct mtk_mmsys_driver_data mt2701_mmsys_driver_data = {
 };
 
 static const struct mtk_mmsys_driver_data mt6765_mmsys_driver_data = {
-	.main_path = mt6765_mtk_ddp_main,
-	.main_len = ARRAY_SIZE(mt6765_mtk_ddp_main),
-	.ext_path = mt6765_mtk_ddp_ext,
-	.ext_len = ARRAY_SIZE(mt6765_mtk_ddp_ext),
+	.main_path = mt6765_mtk_ddp_minimal,
+	.main_len = ARRAY_SIZE(mt6765_mtk_ddp_minimal),
+	//.ext_path = mt6765_mtk_ddp_ext,
+	//.ext_len = ARRAY_SIZE(mt6765_mtk_ddp_ext),
 	.mmsys_dev_num = 1,
 };
 
@@ -450,8 +456,12 @@ static int mtk_drm_kms_init(struct drm_device *drm)
 	struct device *dma_dev = NULL;
 	int ret, i, j;
 
-	if (drm_firmware_drivers_only())
+	dev_err(drm->dev, "drm kms init!!!!!\n");
+
+	if (drm_firmware_drivers_only()) {
+		dev_err(drm->dev, "drm firmware drivers only :((\n");
 		return -ENODEV;
+	}
 
 	ret = drmm_mode_config_init(drm);
 	if (ret)
@@ -611,6 +621,8 @@ static int mtk_drm_bind(struct device *dev)
 	struct drm_device *drm;
 	int ret, i;
 
+	dev_err(dev, "mtk drm bind\n");
+
 	if (!iommu_present(&platform_bus_type))
 		return -EPROBE_DEFER;
 
@@ -626,12 +638,16 @@ static int mtk_drm_bind(struct device *dev)
 	private->mtk_drm_bound = true;
 	private->dev = dev;
 
+	dev_err(dev, "mtk drm get all drm priv\n");
 	if (!mtk_drm_get_all_drm_priv(dev))
 		return 0;
 
+	dev_err(dev, "drm dev alloc\n");
 	drm = drm_dev_alloc(&mtk_drm_driver, dev);
-	if (IS_ERR(drm))
+	if (IS_ERR(drm)) {
+		dev_err(dev, "drm dev alloc fail\n");
 		return PTR_ERR(drm);
+	}
 
 	private->drm_master = true;
 	drm->dev_private = private;
@@ -639,12 +655,16 @@ static int mtk_drm_bind(struct device *dev)
 		private->all_drm_private[i]->drm = drm;
 
 	ret = mtk_drm_kms_init(drm);
-	if (ret < 0)
+	if (ret < 0) {
+		dev_err(dev, "kms init fail\n");
 		goto err_free;
+	}
 
 	ret = drm_dev_register(drm, 0);
-	if (ret < 0)
+	if (ret < 0) {
+		dev_err(dev, "dev register fail\n");
 		goto err_deinit;
+	}
 
 	drm_fbdev_generic_setup(drm, 32);
 
@@ -824,6 +844,8 @@ static int mtk_drm_probe(struct platform_device *pdev)
 	int ret;
 	int i;
 
+	dev_err(dev, "mtk drm probe\n");
+
 	private = devm_kzalloc(dev, sizeof(*private), GFP_KERNEL);
 	if (!private)
 		return -ENOMEM;
@@ -834,9 +856,12 @@ static int mtk_drm_probe(struct platform_device *pdev)
 		return -ENODEV;
 	}
 
+	dev_err(dev, "matching node\n");
 	of_id = of_match_node(mtk_drm_of_ids, phandle);
-	if (!of_id)
+	if (!of_id) {
+		dev_err(dev, "node not matched\n");
 		return -ENODEV;
+	}
 
 	private->data = of_id->data;
 
@@ -868,8 +893,11 @@ static int mtk_drm_probe(struct platform_device *pdev)
 		if (!of_id)
 			continue;
 
+		dev_err(dev, "Adding component %pOF\n",
+						node);
+
 		if (!of_device_is_available(node)) {
-			dev_dbg(dev, "Skipping disabled component %pOF\n",
+			dev_err(dev, "Skipping disabled component %pOF\n",
 				node);
 			continue;
 		}
@@ -882,14 +910,14 @@ static int mtk_drm_probe(struct platform_device *pdev)
 			id = of_alias_get_id(node, "mutex");
 			if (id < 0 || id == private->data->mmsys_id) {
 				private->mutex_node = of_node_get(node);
-				dev_dbg(dev, "get mutex for mmsys %d", private->data->mmsys_id);
+				dev_err(dev, "get mutex for mmsys %d", private->data->mmsys_id);
 			}
 			continue;
 		}
 
 		comp_id = mtk_ddp_comp_get_id(node, comp_type);
 		if (comp_id < 0) {
-			dev_warn(dev, "Skipping unknown component %pOF\n",
+			dev_err(dev, "Skipping unknown component %pOF\n",
 				 node);
 			continue;
 		}
@@ -916,7 +944,7 @@ static int mtk_drm_probe(struct platform_device *pdev)
 		    comp_type == MTK_DP_INTF ||
 		    comp_type == MTK_DPI ||
 		    comp_type == MTK_DSI) {
-			dev_info(dev, "Adding component match for %pOF\n",
+			dev_err(dev, "Adding component match for %pOF\n",
 				 node);
 			drm_of_component_match_add(dev, &match, component_compare_of,
 						   node);
