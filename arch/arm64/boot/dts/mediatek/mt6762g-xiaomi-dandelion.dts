@@ -1,0 +1,67 @@
+// SPDX-License-Identifier: (GPL-2.0 OR MIT)
+/*
+ * Device Tree Source for Xiaomi Redmi 9A (dandelion)
+ *
+ * Copyright (c) 2023 Arseniy Velikanov <adomerlee@gmail.com>
+ * Copyright (C) 2023 Brandon Boese
+ */
+
+/dts-v1/;
+
+#include "mt6765.dtsi"
+#include "mt6765-bl-quirks.dtsi"
+#include "mt6357.dtsi"
+
+/ {
+    model = "Xiaomi Redmi 9A";
+    compatible = "xiaomi,dandelion", "mediatek,mt6762", "mediatek,mt6765";
+
+    chosen {
+        stdout-path = &framebuffer0;
+
+        /*
+         * HACK: Use display framebuffer setup by the lk bootloader for simplefb
+         * NOTE: only text is rendered on VT (TTY) as an unknown bit has to be flipped to disable
+         *        image compression!
+         */
+        framebuffer0: framebuffer@7ef50000 {
+            compatible = "simple-framebuffer";
+            reg = <0 0x7ef50000 0 0xfb0000>;
+            status = "okay";
+            width = <720>;
+            height = <1600>;
+            stride = <((720 + 16) * 4)>;
+            format = "a8r8g8b8";
+        };
+    };
+
+    /* The following are required by stock bootloader to merge with minimal DTBO */
+    gpio@10005000 {
+        linux,phandle = <0xdead>;
+        phandle = <0xdead>;
+    };
+    __symbols__ {
+        gpio = "/gpio@10005000";
+    };
+
+};
+
+&pwrap {
+    status = "okay";
+};
+
+&mmc1 {
+    status = "okay";
+
+    vmmc-supply = <&mt6357_vmch_reg>;
+    vqmmc-supply = <&mt6357_vmc_reg>;
+
+    bus-width = <4>;
+    max-frequency = <200000000>;
+    cap-sd-highspeed;
+    sd-uhs-sdr12;
+    sd-uhs-sdr25;
+    sd-uhs-sdr50;
+    sd-uhs-sdr104;
+    sd-uhs-ddr50;
+};
