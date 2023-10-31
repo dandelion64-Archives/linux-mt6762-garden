@@ -8,9 +8,7 @@
 
 /dts-v1/;
 
-#include "mt6765.dtsi"
-#include "mt6765-bl-quirks.dtsi"
-#include "mt6357.dtsi"
+#include "mt6765-xiaomi-garden-common.dtsi"
 
 / {
     model = "Xiaomi Redmi 9A";
@@ -44,41 +42,4 @@
         gpio = "/gpio@10005000";
     };
 
-};
-
-&pwrap {
-    status = "okay";
-};
-
-&usb2 {
-    status = "okay";
-
-    usb_con: connector {
-        compatible = "usb-b-connector";
-        type = "micro";
-    };
-};
-
-&u2phy {
-    status = "okay";
-};
-
-&u2port {
-    clocks = <&topckgen CLK_TOP_USB20_48M_EN>;
-};
-
-&mmc1 {
-    status = "okay";
-
-    vmmc-supply = <&mt6357_vmch_reg>;
-    vqmmc-supply = <&mt6357_vmc_reg>;
-
-    bus-width = <4>;
-    max-frequency = <200000000>;
-    cap-sd-highspeed;
-    sd-uhs-sdr12;
-    sd-uhs-sdr25;
-    sd-uhs-sdr50;
-    sd-uhs-sdr104;
-    sd-uhs-ddr50;
 };
