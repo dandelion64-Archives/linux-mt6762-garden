@@ -50,6 +50,23 @@
     status = "okay";
 };
 
+&usb2 {
+    status = "okay";
+
+    usb_con: connector {
+        compatible = "usb-b-connector";
+        type = "micro";
+    };
+};
+
+&u2phy {
+    status = "okay";
+};
+
+&u2port {
+    clocks = <&topckgen CLK_TOP_USB20_48M_EN>;
+};
+
 &mmc1 {
     status = "okay";
 
