@@ -15,6 +15,11 @@
     compatible = "xiaomi,dandelion", "mediatek,mt6762", "mediatek,mt6765";
 
     chosen {
+        /*
+         * FIXME: drop clk_ignore_unused, keeps getting watchdog rebooted without it for now!
+         */
+        bootargs = "clk_ignore_unused";
+
         stdout-path = &framebuffer0;
 
         /*
@@ -22,9 +27,9 @@
          * NOTE: only text is rendered on VT (TTY) as an unknown bit has to be flipped to disable
          *        image compression!
          */
-        framebuffer0: framebuffer@7ef50000 {
+        framebuffer0: framebuffer@7ec50000 {
             compatible = "simple-framebuffer";
-            reg = <0 0x7ef50000 0 0xfb0000>;
+            reg = <0 0x7ec50000 0 0xfb0000>;
             status = "okay";
             width = <720>;
             height = <1600>;
