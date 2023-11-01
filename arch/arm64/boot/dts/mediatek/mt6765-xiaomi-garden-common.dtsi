@@ -8,6 +8,44 @@
 #include "mt6765-bl-quirks.dtsi"
 #include "mt6357.dtsi"
 
+/ {
+    compatible = "mediatek,mt6765";
+
+    chosen {
+        /*
+         * FIXME: drop clk_ignore_unused, keeps getting watchdog rebooted without it for now!
+         */
+        bootargs = "clk_ignore_unused";
+
+        stdout-path = &framebuffer0;
+
+        /*
+         * HACK: Use display framebuffer setup by the lk bootloader for simplefb
+         * NOTE: only text is rendered on VT (TTY) as an unknown bit has to be flipped to disable
+         *        image compression!
+         */
+        framebuffer0: framebuffer@7ec50000 {
+            compatible = "simple-framebuffer";
+            reg = <0 0x7ec50000 0 0xfb0000>;
+            status = "okay";
+            width = <720>;
+            height = <1600>;
+            stride = <((720 + 16) * 4)>;
+            format = "a8r8g8b8";
+        };
+    };
+
+    /* The following are required by stock bootloader to merge with minimal DTBO */
+    gpio@10005000 {
+        linux,phandle = <0xdead>;
+        phandle = <0xdead>;
+    };
+    __symbols__ {
+        gpio = "/gpio@10005000";
+    };
+
+};
+
 &pwrap {
     status = "okay";
 };
