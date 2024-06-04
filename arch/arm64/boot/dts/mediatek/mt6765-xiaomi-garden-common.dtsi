@@ -35,6 +35,23 @@
         };
     };
 
+    ldo18_lcd: ldo18-lcd {
+        compatible = "regulator-fixed";
+        regulator-name = "ldo18-lcd";
+        gpio = <&pio 178 GPIO_ACTIVE_HIGH>;
+        enable-active-high;
+        regulator-always-on;  /* hack this on until we get panel driver */
+    };
+
+    lcd_bl: lcd-backlight {
+        compatible = "regulator-fixed";
+        regulator-name = "lcd-bl";
+        gpio = <&pio 154 GPIO_ACTIVE_HIGH>;
+        enable-active-high;
+        regulator-always-on;  /* hack this on until we get panel driver
+                                 remove this line if you don't want to slowly burn your screen */
+    };
+
     /* The following are required by stock bootloader to merge with minimal DTBO */
     gpio@10005000 {
         linux,phandle = <0xdead>;
